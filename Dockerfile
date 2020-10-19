@@ -3,7 +3,7 @@
 FROM scientificlinux/sl:7
 
 MAINTAINER Pengfei Ding "dingpf@fnal.gov"
-ENV REFRESHED_AT 2020-10-12
+ENV REFRESHED_AT 2020-10-19
 
 RUN yum clean all \
  && yum -y install epel-release \
