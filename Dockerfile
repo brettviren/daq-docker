@@ -47,4 +47,8 @@ RUN yum clean all \
  && yum -y install glew-devel unzip perl-ExtUtils-Embed expect \
  && yum clean all
 
+RUN yum clean all \
+ && yum -y install xxhash \
+ && yum clean all
+
 ENTRYPOINT ["/bin/bash"]
