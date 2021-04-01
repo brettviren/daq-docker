@@ -1,9 +1,12 @@
 #!/bin/bash
 
+cvmfs_dir="/cvmfs/dunedaq.opensciencegrid.org"
+
 daq_release_branch="develop"
 release="dunedaq-develop"
-cvmfs_dir="/cvmfs/dunedaq.opensciencegrid.org"
-output_list="/scratch/cvmfs_flist.txt"
+outdir="/scratch/image"
+outdir_cvmfs="$outdir/cvmfs_mirror/dunedaq.opensciencegrid.org"
+outdir_release="$outdir/releases/$release"
 
 while getopts ":b:r:o:h" opt; do
   case ${opt} in
@@ -14,14 +17,14 @@ while getopts ":b:r:o:h" opt; do
        release=$OPTARG
        ;;
     o )
-       output_list=$OPTARG
+       outdir=$OPTARG
        ;;
     h )
       echo "Usage:"
       echo "    get_cvmfs_dirs_of_externas.sh  -h Display this help message."
       echo "    [-b] <branch/commit/tag of daq-release repo>"
       echo "    [-r] <release name under daq-release/configs>"
-      echo "    [-o] <output list file>"
+      echo "    [-o] <output dir path for cvmfs mirror and releases>"
       exit 0
       ;;
    \? )
@@ -31,15 +34,19 @@ while getopts ":b:r:o:h" opt; do
   esac
 done
 
-
 source $cvmfs_dir/products/setup
 
 cd /scratch
-rm -f dbt-settings.sh
-wget https://raw.githubusercontent.com/DUNE-DAQ/daq-release/develop/configs/dunedaq-develop/dbt-settings.sh
+git clone https://github.com/DUNE-DAQ/daq-release.git -b $daq_release_branch
+cd /scratch/daq-release && git pull
+cd /scratch
 
-source dbt-settings.sh
+source /scratch/daq-release/configs/$release/dbt-settings.sh
+export PATH=/scratch/daq-release/scripts:$PATH
 
+create-ups-products-area.sh -t $outdir_cvmfs/products
+create-ups-products-area.sh -t $outdir_release/packages
+create-ups-products-area.sh -t $outdir_release/externals
 for prod in "${dune_externals[@]}"; do
     prodArr=(${prod})
 
@@ -51,32 +58,49 @@ for prod in "${dune_externals[@]}"; do
     ${setup_cmd}
 done
 
-rm -rf $output_list
-
-for i in `ups active| sed 1d| awk '{print $1}'| tr [a-z] [A-Z]`
+for prd in `ups active| sed 1d| awk '{print $1}'`
 do
-    if [ $i = "UPS" ]; then
+    exclude_list="clang ups"
+    #exclude_list="gcc boost clang hdf5 ups"
+    if [[ $exclude_list =~ (^|[[:space:]])"$prd"($|[[:space:]]) ]]; then
         continue
     fi
+    i=`echo $prd|tr [a-z] [A-Z]`
     j=${i}_DIR
-    echo ${!j} >> $output_list
-    echo ${!j}.version >> $output_list
+    prd_path=`dirname ${!j}`
+    prd_ver=`basename ${!j}`
+    srcs=($cvmfs_dir/products/$prd/$prd_ver
+	    $cvmfs_dir/products/$prd/${prd_ver}.version
+	    $cvmfs_dir/products/$prd/current.chain
+    )
+    link_dests=($outdir_release/externals/$prd/$prd_ver
+	    $outdir_release/externals/$prd/${prd_ver}.version
+	    $outdir_release/externals/$prd/current.chain
+    )
+    cvmfs_dests=($outdir_cvmfs/products/$prd/$prd_ver
+	    $outdir_cvmfs/products/$prd/${prd_ver}.version
+	    $outdir_cvmfs/products/$prd/current.chain
+    )
+    if [ -d ${srcs[0]} ]; then
+	if [ -d ${cvmfs_dests[0]} ]; then
+		echo "Info: ${cvmfs_dests[0]} exists, skip."
+	else
+		[[ -d `dirname ${cvmfs_dests[0]}` ]] && rm -rf dirname ${cvmfs_dests[0]}/*
+		[[ -d `dirname ${link_dests[0]}` ]] && rm -rf `dirname ${link_dests[0]}`/*
+		mkdir -p `dirname ${link_dests[0]}`
+		for k in `seq 0 2`; do
+                    if [ -d ${srcs[k]} ]; then
+                        rsync -ah ${srcs[k]} `dirname  ${cvmfs_dests[0]}`
+			echo "found ${srcs[k]}"
+                        ln -s ${srcs[k]} ${link_dests[k]}
+		    fi
+                done
+	fi
+    fi
 done
 
-# Now adding additonal dirs
+rsync -ah /cvmfs/dunedaq.opensciencegrid.org/pypi-repo $outdir_cvmfs
+rsync -ah /scratch/daq-release/configs/$release/dbt-settings.sh $outdir_release
+rsync -ah /scratch/daq-release/configs/$release/dbt-build-order.cmake $outdir_release
+rsync -ah /scratch/daq-release/configs/$release/pyvenv_requirements.txt $outdir_release
 
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/cetpkgsupport/current.chain">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/setup">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/setups">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/setups.new">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/setups_layout">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/ups">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/.updfiles">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/products/.upsfiles">>$output_list
-echo "/cvmfs/dunedaq.opensciencegrid.org/pypi-repo">>$output_list
-
-# Now make cvmfs mirror
-/scratch/copy-cvmfs-files.py $output_list /scratch/cvmfs_mirror
-
-rm -f /scratch/dbt-settings.sh
-rm -f $output_list
