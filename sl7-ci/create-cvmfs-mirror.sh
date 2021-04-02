@@ -123,3 +123,4 @@ rsync -ah /scratch/daq-release/configs/$release/dbt-settings.sh $outdir_release
 rsync -ah /scratch/daq-release/configs/$release/dbt-build-order.cmake $outdir_release
 rsync -ah /scratch/daq-release/configs/$release/pyvenv_requirements.txt $outdir_release
 
+rm -rf /scratch/daq-release
