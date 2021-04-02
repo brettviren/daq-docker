@@ -1,10 +1,25 @@
 #!/bin/bash
 
-cvmfs_dir="/cvmfs/dunedaq.opensciencegrid.org"
+function setup_prds {
+    prd_list_name=$1[@]
+    prd_list=("${!prd_list_name}")
+    for prod in "${prd_list[@]}"; do
+        prodArr=(${prod})
+        setup_cmd="setup -B ${prodArr[0]//-/_} ${prodArr[1]}"
+        if [[ ${#prodArr[@]} -eq 3 ]]; then
+            setup_cmd="${setup_cmd} -q ${prodArr[2]}"
+        fi
+        echo $setup_cmd
+        ${setup_cmd}
+    done
+}
+
 
 daq_release_branch="develop"
 release="dunedaq-develop"
 outdir="/scratch/image"
+
+cvmfs_dir="/cvmfs/dunedaq.opensciencegrid.org"
 outdir_cvmfs="$outdir/cvmfs_mirror/dunedaq.opensciencegrid.org"
 outdir_release="$outdir/releases/$release"
 
@@ -47,6 +62,10 @@ export PATH=/scratch/daq-release/scripts:$PATH
 create-ups-products-area.sh -t $outdir_cvmfs/products
 create-ups-products-area.sh -t $outdir_release/packages
 create-ups-products-area.sh -t $outdir_release/externals
+setup_prds dune_externals
+setup_prds dune_systems
+setup_prds dune_devtools
+
 for prod in "${dune_externals[@]}"; do
     prodArr=(${prod})
 
