@@ -4,6 +4,7 @@ host_cvmfs="/home/dingpf/cvmfs_dunedaq"
 docker_tag="dunedaq/sl7-minimal:dev"
 nightly_tag="dunedaq/sl7-minimal-nightly:N$(date +%y-%m-%d)"
 
+docker pull dunedaq/sl7-minimal:latest
 docker run --rm -it -v $host_cvmfs:/cvmfs/dunedaq.opensciencegrid.org  -v $PWD:/scratch dunedaq/sl7-minimal /scratch/create-cvmfs-mirror.sh
 
 docker pull dunedaq/sl7-minimal:latest
