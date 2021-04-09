@@ -31,7 +31,7 @@ RUN yum clean all \
 
 RUN yum clean all \
  && yum --enablerepo=epel -y install htop osg-wn-client \
- libconfuse-devel xvfb nss_wrapper gettext \
+ libconfuse-devel xvfb nss_wrapper gettext libzstd \
  && yum clean all
 
 RUN yum clean all \

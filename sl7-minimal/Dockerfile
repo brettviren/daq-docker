@@ -2,7 +2,6 @@
 
 FROM scientificlinux/sl:7
 
-MAINTAINER Pengfei Ding "dingpf@fnal.gov"
 ENV REFRESHED_AT 2021-01-28
 
 ENV UPS_OVERRIDE="-H Linux64bit+3.10-2.17"
