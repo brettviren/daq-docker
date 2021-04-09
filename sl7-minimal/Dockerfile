@@ -20,4 +20,10 @@ RUN yum clean all \
     git wget curl tar zip \
  && yum clean all
 
+RUN yum clean all \
+ && yum -y install epel-release \
+ && yum -y update \
+ && yum -y install libzstd \
+ && yum clean all
+
 ENTRYPOINT ["/bin/bash"]
