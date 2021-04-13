@@ -21,7 +21,7 @@ RUN yum clean all \
  gcc gcc-c++ libgcc.i686 glibc-devel.i686 libstdc++.i686 libffi-devel \
  && yum -y install yum-plugin-priorities \
  nc perl expat-devel gdb time tar zip xz bzip2 patch sudo which strace \
- openssh-clients rsync tmux svn git wget cmake \
+ openssh-clients rsync tmux svn wget cmake \
  gcc gstreamer gtk2-devel xterm \
  gstreamer-plugins-base-devel  \
  vim which net-tools xorg-x11-fonts* \
@@ -36,6 +36,12 @@ RUN yum clean all \
 
 RUN yum clean all \
  && yum -y install java-11-openjdk \
+ && yum clean all
+
+RUN yum clean all \
+ && yum -y install https://repo.ius.io/ius-release-el7.rpm \
+ && yum -y update \
+ && yum -y install git224 \
  && yum clean all
 
 

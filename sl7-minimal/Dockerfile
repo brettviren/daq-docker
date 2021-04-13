@@ -17,13 +17,14 @@ RUN yum clean all \
 # Common system tools requried to run various bash scripts
 RUN yum clean all \
  && yum -y install \
-    git wget curl tar zip \
+    wget curl tar zip \
  && yum clean all
 
 RUN yum clean all \
  && yum -y install epel-release \
+ && yum -y install https://repo.ius.io/ius-release-el7.rpm \
  && yum -y update \
- && yum -y install libzstd \
+ && yum -y install libzstd git224 \
  && yum clean all
 
 ENTRYPOINT ["/bin/bash"]
