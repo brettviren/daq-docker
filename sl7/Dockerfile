@@ -7,9 +7,10 @@ ENV REFRESHED_AT 2020-10-19
 
 RUN yum clean all \
  && yum -y install epel-release \
+ && yum -y install https://repo.ius.io/ius-release-el7.rpm
  && yum -y update \
  && yum -y install yum-plugin-priorities \
- subversion asciidoc bzip2-devel \
+ git224 subversion asciidoc bzip2-devel \
  fontconfig-devel freetype-devel gdbm-devel glibc-devel \
  ncurses-devel openssl-devel openldap-devel readline-devel \
  autoconf automake libtool swig texinfo tcl-devel tk-devel \
@@ -36,12 +37,6 @@ RUN yum clean all \
 
 RUN yum clean all \
  && yum -y install java-11-openjdk \
- && yum clean all
-
-RUN yum clean all \
- && yum -y install https://repo.ius.io/ius-release-el7.rpm \
- && yum -y update \
- && yum -y install git224 \
  && yum clean all
 
 

@@ -2,14 +2,17 @@
 
 FROM scientificlinux/sl:7
 
-ENV REFRESHED_AT 2021-01-28
+ENV REFRESHED_AT 2021-04-13
 
 ENV UPS_OVERRIDE="-H Linux64bit+3.10-2.17"
 
 # Tools for building the DAQ release
 
 RUN yum clean all \
- && yum -y install \
+ && yum -y install epel-release \
+ && yum -y install https://repo.ius.io/ius-release-el7.rpm \
+ && yum -y update \
+ && yum -y install libzstd git224 \
     make redhat-lsb-core glibc-devel \
     openssl-devel xz-devel bzip2-devel \
  && yum clean all
@@ -20,11 +23,5 @@ RUN yum clean all \
     wget curl tar zip \
  && yum clean all
 
-RUN yum clean all \
- && yum -y install epel-release \
- && yum -y install https://repo.ius.io/ius-release-el7.rpm \
- && yum -y update \
- && yum -y install libzstd git224 \
- && yum clean all
 
 ENTRYPOINT ["/bin/bash"]
