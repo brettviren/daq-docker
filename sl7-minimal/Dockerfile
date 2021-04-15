@@ -14,13 +14,13 @@ RUN yum clean all \
  && yum -y update \
  && yum -y install libzstd git224 \
     make redhat-lsb-core glibc-devel \
-    openssl-devel xz-devel bzip2-devel \
+    openssl-devel xz-devel bzip2-devel libcurl-devel \
  && yum clean all
 
 # Common system tools requried to run various bash scripts
 RUN yum clean all \
  && yum -y install \
-    wget curl tar zip \
+    wget curl tar zip rsync \
  && yum clean all
 
 
