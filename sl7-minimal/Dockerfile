@@ -21,7 +21,7 @@ RUN yum clean all \
 # Common system tools requried to run various bash scripts
 RUN yum clean all \
  && yum -y install \
-    wget curl tar zip rsync \
+    wget curl tar zip rsync openssh-server \
  && yum clean all
 
 
