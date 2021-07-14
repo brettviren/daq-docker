@@ -1,0 +1,68 @@
+#+title: Add SSH Daemon to sl7
+
+* Why
+
+If these all are true, this image may be for you.
+
+- You want to run or develop DUNE DAQ s/w.
+
+- You want to work interactively in SL7.
+
+- Your native OS is not SL7.
+
+- You want to run applications (like ~nanorc~) that assume ~ssh localhost~ lands in an SL7 shell.
+
+* Authorization and security
+
+If you want write access to your own host files, you will need to edit
+the ~Dockerfile~ to assure the user ID (default is ~1001~) matches your
+native uid.
+
+A user SSH key is required for access the ~sshd~.  The public key will
+be authorized for access to a user named ~user~ as well as the
+container's ~root~ account.  To make the key pair and before building
+the image:
+
+#+begin_example
+❯ cd sl7-sshd
+❯ ssh-keygen -f id_user -C "user@dunedaq"
+#+end_example
+
+The ~id_user~ file name is assumed in the ~Dockerfile~.
+
+* Build
+
+The base image is ~dunedaq/sl7~ which can be taken from docker-hub or
+created locally with:
+
+#+begin_example
+❯ cd ../sl7
+❯ docker build -t dunedaq/sl7 .
+#+end_example
+
+The ~dunedaq/sl7-sshd~ builds on top of that:
+
+#+begin_example
+❯ cd ../sl7-sshd
+❯ docker build -t dunedaq/sl7-sshd .
+#+end_example
+
+* Start
+
+Run with access to host provided CVMFS and other directories.
+
+#+begin_example
+❯ docker run \
+        -v /cvmfs:/cvmfs:shared \
+        --mount type=bind,source=/home/bv,target=/home/bv \
+        -p 127.0.0.1:2222:22/tcp -ti dunedaq/sl7-sshd
+[root@063c28a43bef /]# /usr/sbin/sshd
+#+end_example
+
+* Access
+
+#+begin_example
+❯ cd /home/bv/dev/dune-daq/daq-docker/sl7-sshd
+❯ ssh-add id_user
+❯ ssh user@localhost -p 2222
+#+end_example
