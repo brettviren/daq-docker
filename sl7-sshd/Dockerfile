@@ -67,6 +67,8 @@ RUN chmod 600 /home/user/.ssh/authorized_keys
 COPY id_user /home/user/.ssh/id_rsa
 RUN chmod 400 /home/user/.ssh/id_rsa
 RUN chown -R user:user /home/user/.ssh
-RUN /usr/sbin/sshd
 ENTRYPOINT ["/bin/bash"]
+
+
+
 
