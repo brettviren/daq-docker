@@ -7,7 +7,7 @@ ENV REFRESHED_AT 2020-10-19
 
 RUN yum clean all \
  && yum -y install epel-release \
- && yum -y install https://repo.ius.io/ius-release-el7.rpm
+ && yum -y install https://repo.ius.io/ius-release-el7.rpm \
  && yum -y update \
  && yum -y install yum-plugin-priorities \
  git224 subversion asciidoc bzip2-devel \
@@ -49,7 +49,7 @@ RUN yum clean all \
  && yum clean all
 
 RUN yum clean all \
- && yum -y install xxhash cyrus-sasl-devel \
+ && yum -y install xxhash xxhash-libs cyrus-sasl-devel \
  && yum clean all
 
 ENTRYPOINT ["/bin/bash"]
